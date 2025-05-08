@@ -60,7 +60,7 @@ Certifique-se de ter o seguinte ambiente configurado:
 
 1. **Clone este repositório**:
    ```bash
-   git clone https://github.com/seu-usuario/chat-laudo.git
+   git clone https://github.com/duvictor/fastcamp_agentes_projeto_final.git 
    cd chat-laudo
    ```
 
