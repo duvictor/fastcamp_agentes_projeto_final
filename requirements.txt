@@ -1,0 +1,9 @@
+pandas
+sentence_transformers
+qdrant_client
+langchain
+pydantic==2.6.1
+langchain_community
+pypdf
+crewai-tools
+tokenizers>=0.21
