@@ -1,5 +1,7 @@
 """
 classe responsável por manter os agentes
+Paulo Victor Dos Santos 2025
+Universidade Federal de Goiás
 """
 
 from crewai import Crew, Process, Agent, Task, LLM

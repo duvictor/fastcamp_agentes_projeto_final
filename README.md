@@ -1,6 +1,8 @@
 # Chat Laudo - RAG de Laudos Médicos
 
-Aplicação web desenvolvida em **Streamlit** para análise, processamento e classificação de laudos médicos. Este projeto permite que os usuários façam o upload de documentos PDF de laudos médicos, processem esses arquivos e obtenham informações classificadas, como quantidade de laudos por especialidade, modalidade e o total de laudos processados.
+Aplicação web desenvolvida em **Streamlit** com **Agentes Inteligentes** para análise, processamento e classificação de laudos médicos. Este projeto permite que os usuários façam o upload de documentos PDF de laudos médicos, processem esses arquivos e obtenham informações classificadas, como quantidade de laudos por especialidade, modalidade e o total de laudos processados.
+
+Além de possibilitar que os agentes possam esclarecer de forma resumida e em linguagem de fácil entendimento o conteúdo do laudo médico.
 
 ## Principais Funcionalidades
 
@@ -25,20 +27,34 @@ Aplicação web desenvolvida em **Streamlit** para análise, processamento e cla
 ## Estrutura do Projeto
 
 ```plaintext
+├── data/
+│   ├── Protocolo.py         # Classe de modelagem de negócio
+├── docs/                    # Dataset de laudos anonimizados e privados
 ├── src/
 │   ├── Util.py              # Classe utilitária para suporte ao processamento de textos e PDFs
+│   ├── Enumeradores.py      # Classe de domínio da área médica
+│   ├── Agentes.py           # Classe responsável por manter os agentes inteligentes
 │   ├── QdrantConection.py   # Integrações com o banco de dados Qdrant para contagem de dados
 ├── app.py                   # Arquivo principal contendo a lógica do Streamlit
+├── run_debug.py             # Facilita o desenvolvimento no Streamlit, possibilitando depurar
+├── testar_fluxo.py          # Simula o fluxo principal sem a necessidade do Streamlit
 ├── requirements.txt         # Lista de dependências para rodar o projeto
 └── README.md                # Documentação do projeto
 ```
+
+O dataset foi desenvolvido por uma equipe do Hospital Albert Einstein para testes internos e não poderá ser utilizado
+em outros projetos sem o devido consentimento. 
+
+Todos os direitos são reservados.
 
 ## Pré-Requisitos
 
 Certifique-se de ter o seguinte ambiente configurado:
 
-- Python 3.8 ou superior
+- Python 3.11 ou superior
 - Pip instalado
+- Todo código foi desenvolvido utilizando a IDE Pycharm
+- ![img_1.png](img_1.png)
 
 ## Como Executar
 
@@ -59,8 +75,16 @@ Certifique-se de ter o seguinte ambiente configurado:
    ```bash
    pip install -r requirements.txt
    ```
+   
+4. **Crie o arquivo de variáveis**:
+   
+    Crie o arquivo .env e adicione as chaves da openAI e o nome da coleção do qdrant
 
-4. **Execute a aplicação**:
+    Conforme o exemplo abaixo:
+
+   ![img.png](img.png)
+
+5. **Execute a aplicação**:
    ```bash
    streamlit run app.py
    ```
@@ -81,6 +105,29 @@ Certifique-se de ter o seguinte ambiente configurado:
 
 3. **Mensagens de feedback**:
    - O sistema notificará em caso de erros no processamento ou sucesso na submissão dos arquivos.
+   
+4. **Interação com dados dos laudos**:
+   - O sistema irá responder de forma precisa todas as dúvidas referentes aos laudos.
+
+
+## Tecnologias usadas
+
+    -Qdrant
+    -CrewAI
+    -Transformers
+    -Embeddings
+    -Streamlit
+    -OpenAI
+    -Langchain
+    -Pydantic
+
+
+
+## Qdrant
+
+O sistema utiliza a base de dados vetorial local qdrant.
+Caso seja necessário, poderá ser utilizado um servidor virtual em nuvem.
+
 
 ## Todo (Melhorias futuras)
 

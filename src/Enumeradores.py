@@ -1,5 +1,7 @@
 """
 responsavel por manter os enumeradores da solução
+Paulo Victor Dos Santos 2025
+Universidade Federal de Goiás
 """
 from enum import Enum
 

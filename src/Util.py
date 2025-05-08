@@ -1,5 +1,7 @@
 """
 responsavel por manter as funcionalidades essenciais para o aplicativo
+Paulo Victor Dos Santos 2025
+Universidade Federal de Goiás
 """
 
 import re

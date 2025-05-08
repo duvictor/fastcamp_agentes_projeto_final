@@ -1,3 +1,8 @@
+"""
+responsavel por criar uma interface homem máquina para a solução
+Paulo Victor Dos Santos 2025
+Universidade Federal de Goiás
+"""
 import streamlit as st
 import src.Util as utils
 import src.QdrantConection as qc

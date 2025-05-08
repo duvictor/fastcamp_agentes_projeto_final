@@ -1,4 +1,8 @@
-
+"""
+responsavel por permitir a interação com o Qdrant
+Paulo Victor Dos Santos 2025
+Universidade Federal de Goiás
+"""
 from qdrant_client import QdrantClient, models
 import os
 from dotenv import load_dotenv
