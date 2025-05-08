@@ -60,6 +60,31 @@ except Exception as e:
 
 
 
+def get_count(chave):
+
+    # Define o filtro para buscar vetores onde o campo 'especialidade' não é nulo
+    filters = models.Filter(
+        must_not=[
+            # models.HasIdCondition(has_id=True),  # Garante que o ponto existe
+            models.FieldCondition(
+                key=chave,
+                match=models.MatchValue(value=" "),
+            )
+        ]
+    )
+
+    # Realiza a contagem dos pontos que соответствуют ao filtro
+    count_result = client.count(
+        collection_name=COLLECTION_NAME,
+        count_filter=filters,
+        exact=True  # Para obter uma contagem precisa
+    )
+
+    quantidade = count_result.count
+    print(f"A quantidade de itens com a propriedade {chave} preenchida é: {quantidade}")
+    return quantidade
+
+
 def upsert_to_qdrant(laudoPdf) -> bool:
     try:
         points = []
