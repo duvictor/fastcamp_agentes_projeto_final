@@ -1,174 +1,112 @@
-# O que fazer?
+# Chat Laudo - RAG de Laudos Médicos
 
-Abaixo as tarefas a serem consideradas no projeto final do curso de agentes inteligentes.
+Aplicação web desenvolvida em **Streamlit** para análise, processamento e classificação de laudos médicos. Este projeto permite que os usuários façam o upload de documentos PDF de laudos médicos, processem esses arquivos e obtenham informações classificadas, como quantidade de laudos por especialidade, modalidade e o total de laudos processados.
 
+## Principais Funcionalidades
 
- 01/05/2025
+- **Interface amigável** com Streamlit
+- **Upload de arquivos PDF** diretamente via interface
+- **Processamento de laudos médicos** para extração de informações relevantes
+- **Classificação** e contagem de laudos por categorias:
+  - Especialidade
+  - Modalidade
+  - Total de documentos processados
+- **Notificações e mensagens de erro** durante o processamento
 
+## Tecnologias Utilizadas
 
-[ ] validação de dados Pydantic = ok
+- **Python**: Linguagem principal para desenvolvimento
+- **Streamlit**: Framework para criação de aplicações web interativas
+- **Qdrant**: Utilizado para consulta e contabilização de classes de laudos médicos
+- **Bibliotecas auxiliares**:
+  - Manipulação e processamento de arquivos PDF
+  - Integração com componentes de I/O no Streamlit
 
-[ ] Orquestração de multiagente
+## Estrutura do Projeto
 
-[ ] interface com usuário, streamlit = ok
+```plaintext
+├── src/
+│   ├── Util.py              # Classe utilitária para suporte ao processamento de textos e PDFs
+│   ├── QdrantConection.py   # Integrações com o banco de dados Qdrant para contagem de dados
+├── app.py                   # Arquivo principal contendo a lógica do Streamlit
+├── requirements.txt         # Lista de dependências para rodar o projeto
+└── README.md                # Documentação do projeto
+```
 
-[ ] comunicação com whatsapp via langflow
+## Pré-Requisitos
 
-[ ] embeddings = ok
+Certifique-se de ter o seguinte ambiente configurado:
 
-[ ] fluxos de trabalho com langflow
+- Python 3.8 ou superior
+- Pip instalado
 
-[ ] relatório e código
+## Como Executar
 
+1. **Clone este repositório**:
+   ```bash
+   git clone https://github.com/seu-usuario/chat-laudo.git
+   cd chat-laudo
+   ```
 
-#### ETAPAS DO PROJETO
+2. **Configure o ambiente virtual**:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate          # macOS/Linux
+   venv\Scripts\activate             # Windows
+   ```
 
-[ ] problema na área da saúde.
+3. **Instale as dependências**:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-[ ] uma seção no relatório descrevendo o problema.
+4. **Execute a aplicação**:
+   ```bash
+   streamlit run app.py
+   ```
 
-[ ] definir o agente, único ou multiagente
+5. **Acesse no navegador**:
+   - Após executar o comando acima, o Streamlit abrirá automaticamente em seu navegador no endereço padrão: `http://localhost:8501`.
 
-[ ] uma seção no relatório detalhando a arquitetura do mvp, diagrama e explicação do agente
+## Uso da Aplicação
 
-[ ] identificar os dados de entrada e implementar modelo pydantic
+1. **Upload de Laudos Médicos**:
+   - No menu lateral, faça o upload de um ou mais arquivos PDF.
+   - Clique no botão "Submeter".
 
-[ ] código python demonstrando os modelos pydantic, referenciar o código no relatório
+2. **Visualização de Dados**:
+   - Após o processamento, as informações extraídas dos laudos serão exibidas:
+     - Contagem total de laudos processados.
+     - Contagem por especialidade e modalidade (consultas feitas ao Qdrant).
 
-[ ] criar fluxo no langflow que represente a lógica principal do agente
+3. **Mensagens de feedback**:
+   - O sistema notificará em caso de erros no processamento ou sucesso na submissão dos arquivos.
 
-[ ] entregar arquivo langflow e colocar na seção do relatório
+## Todo (Melhorias futuras)
 
-[ ] utilizar embeedings, exemplo, na classificação ou na busca
+- Integração com APIs de IA para análise semântica dos laudos.
+- Suporte para exportar os resultados em formatos comuns como CSV ou Excel.
+- Adição de gráficos interativos para visualização de dados.
+- Melhorias no tratamento de erros e maior suporte a formatos além de PDF.
 
-[ ] código python e seção no relatório
+## Contribuindo
 
-[ ] Orquestração de multiagente
+Contribuições são bem-vindas! Para contribuir:
 
-[ ] seção e código
+1. Faça um fork do repositório.
+2. Crie uma branch com sua feature: `git checkout -b minha-feature`.
+3. Commit suas alterações: `git commit -m 'Adiciona minha feature'`.
+4. Faça o push para sua branch: `git push origin minha-feature`.
+5. Abra um Pull Request neste repositório.
 
-[ ] Interface com usuário utilizando streamlit
+## Licença
 
-[ ] código e seção no relatório
+Este projeto é distribuído sob a licença [MIT](https://opensource.org/licenses/MIT).
 
-[ ] comunicar com whatsapp 
+---
 
-[ ] código e seção no relatório
+Projeto desenvolvido para **Processamento e Classificação de Laudos Médicos** com foco em simplicidade e usabilidade!
 
-[ ] readme.md detalhadado
-** descrição
-** tecnologias usadas
-** instrução de instalação
-** instruçoes como executar
-** capturas de tela
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-O desafio é construir um agente inteligente que possa classificar mensagens de entrada, 
-definir rotas e comportamentos com base em embeddings e similaridade, 
-e realizar a sumarização de informações específicas contidas em um PDF, 
-utilizando RAG (Retrieval-Augmented Generation) para focar o modelo nas informações relevantes.
-
-
-#### 1 [ ] Classificação de mensagens de entrada.
-
-
-
-
-1.1 [ ] Implementar um modelo de classificação simples para filtrar mensagens de entrada.
-
-1.2 [ ] Utilizar técnicas de prompt para melhorar a eficácia do modelo de classificação.
-
-#### 2 [ ] Definição de Rotas e Comportamentos
-
-2.1 [ ] Utilizar Embeddings e técnicas de similaridade para definir rotas e comportamentos do agente com base nas mensagens classificadas
-
-2.2 [ ] Usar sentence-transformers ou qualquer outra biblioteca de embeddings
-
-#### 3 [ ] Sumarização 
-3.1 [ ] implementar código para sumarizar informações utilizando prompt para melhorar resultados.
-
-3.2 [ ] Utilizar RAG para garantir que o modelo se concentre apenas nas informações contidas em um PDF específico
-
-3.3 [ ] pmupdf para leitura de pdf e transformes da Hugging Face para Rag e sumarização
-
-
-
-
-## Roteiro
-
-* criar um front usando streamlit 
-* fazer upload de pdf, gerar chunks, gerar embeddings, salvar num banco de dados
-* Classificar as mensagens de entrada do usuário através de um agente
-* Criar rotas (flow) usando o crewai, as rotas e comportamentos devem ser com base em embedding e similaridade
-     Exemplo,    tal similaridade é parecido com tal coisa, vai pra rota tal
-                tal similaridade é parecido com outra coisa, vai pra outra rota
-* Realizar a sumarização de informações específica do PDF utilizando RAG.
-
-
-
-O front deverá ter um upload de pdf, um aba para mostrar as palavras chaves e a sumarização
-o front deverá ter um chat para o usuário interagir com o pdf (embeddings)
-as mensagens do usuário deverão ser classificadas e exibidas em uma outra aba
-Os PDF devem ser classificados e exibidos no formato de árvore.
-    Os Pdf deverão ser classificados em especialidade e modalidade
-    Haverá fluxo para modalidade e fluxo para especialidade
-
-
-
-A pergunta é sobre a especialidade?
-A pergunta é sobre a modalidade?
-A pergunta é genérica?
-
-
-
-# Qdrant
-
-!docker run -d -p "6333:6333" -p "6334:6334" --name "reverse_image_search" qdrant/qdrant:v1.10.1
-
-
-
-# Referencias
-
-https://levelup.gitconnected.com/building-a-rag-application-using-streamlit-langchain-and-deepseek-r1-7e7225e598ae
-https://medium.com/@habbema/estruturando-projetos-em-python-692502641c05
-https://eskelsen.medium.com/estruturando-projetos-em-python-um-modelo-de-sistema-d0652d289bc
-https://medium.com/@vikrambhat2/agentic-rag-mastering-document-retrieval-with-crewai-deepseek-and-streamlit-21cb3886bbbf
-https://ai.gopubby.com/multi-agent-system-for-research-summarization-and-reporting-with-crew-ai-c5e41a712c25
-https://www.datacamp.com/tutorial/agentic-rag-tutorial
-https://medium.com/the-ai-forum/build-a-local-reliable-rag-agent-using-crewai-and-groq-013e5d557bcd
-https://github.com/benitomartin/crewai-rag-langchain-qdrant
-https://medium.aiplanet.com/retrieval-augmented-generation-using-qdrant-huggingface-embeddings-and-langchain-and-evaluate-the-3c7e3b1e4976
-https://medium.com/@erickcalderin/classic-rag-with-huggingface-qdrant-and-streamlit-4a0918b20fa7
-https://qdrant.tech/blog/webinar-crewai-qdrant-obsidian/
-https://qdrant.tech/documentation/agentic-rag-crewai-zoom/
-https://github.com/qdrant/examples/blob/master/rag-with-qdrant-deepseek/deepseek-qdrant.ipynb
-https://qdrant.tech/documentation/agentic-rag-crewai-zoom/
-https://docs.crewai.com/tools/qdrantvectorsearchtool
-https://huggingface.co/blog/Andyrasika/qdrant-transformers
-
-
-
-correções para debugar streamlit no pycharm
-
-https://discuss.streamlit.io/t/cannot-debug-streamlit-in-pycharm-2023-3-3/61581
-https://python.langchain.com/docs/integrations/vectorstores/qdrant/
-https://qdrant.tech/documentation/data-ingestion-beginners/#:~:text=To%20start%20visualizing%20your%20data,and%20select%20Access%20the%20database.&text=The%20first%20query%20retrieves%20all,third%20performs%20a%20sample%20query.
-https://docs.crewai.com/tools/qdrantvectorsearchtool
-
+Desenvolvido por Paulo Victor Dos Santos, como trabalho final do curso de Agentes inteligentes pela UFG em 2025
 
 

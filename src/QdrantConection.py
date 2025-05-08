@@ -1,3 +1,4 @@
+
 from qdrant_client import QdrantClient, models
 import os
 from dotenv import load_dotenv
@@ -61,7 +62,19 @@ except Exception as e:
 
 
 def get_count(chave):
+    """
+    This function calculates the count of items in the specified collection that satisfy
+    a given condition. The condition is defined as the absence of a specific field value
+    for the provided key. The function ensures that items satisfying the filter conditions
+    are precisely counted.
 
+    :param chave: The key or field to be checked for specific conditions in the collection
+                  items.
+    :type chave: str
+    :return: The count of items in the collection that have the specified key not matching
+             the given condition.
+    :rtype: int
+    """
     # Define o filtro para buscar vetores onde o campo 'especialidade' não é nulo
     filters = models.Filter(
         must_not=[
@@ -86,6 +99,22 @@ def get_count(chave):
 
 
 def upsert_to_qdrant(laudoPdf) -> bool:
+    """
+    Insert or update a document in the Qdrant collection.
+
+    This function takes a document (laudoPdf), converts it into the required
+    format for Qdrant, and inserts or updates it in the specified collection.
+    The document must have an `id`, an `embedding` representing its vector,
+    and must be convertible to a dictionary format for payload metadata.
+
+    :param laudoPdf: The document to be upserted into Qdrant. It must have an
+        `id`, `embedding` as a list of vectors, and should be convertible to a
+        dictionary format.
+    :type laudoPdf: Any
+    :return: A boolean flag indicating whether the upsert operation was
+        successful. Returns `True` if successful, otherwise `False`.
+    :rtype: bool
+    """
     try:
         points = []
 

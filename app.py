@@ -6,6 +6,37 @@ import src.QdrantConection as qc
 # from openai import OpenAI
 
 def main():
+    """
+    Sets up a Streamlit application to interact with and process medical reports.
+    The application allows users to submit PDF documents of medical reports through
+    a sidebar menu. Additionally, users can ask questions related to the medical
+    reports via a text input field, and statistical insights are displayed in the
+    main section.
+
+    Attributes
+    ----------
+    textUtil : utils.TextUtil
+        Utility for handling text processing including PDF parsing and classification.
+
+    Methods
+    -------
+    process_pdf(temp_file, x.name):
+        Processes the uploaded PDF files of medical reports.
+
+    Parameters
+    ----------
+    None
+
+    Raises
+    ------
+    InterruptedError
+        If the processing of a PDF file is interrupted.
+    Exception
+        Any runtime exceptions or errors encountered during execution.
+
+    :return:
+        None
+    """
     st.set_page_config("Chat Laudo")
     st.header("RAG De Laudos Médicos")
 
@@ -19,7 +50,7 @@ def main():
 
     with st.sidebar:
         st.title("Menu:")
-        pdf_doc = st.file_uploader("Adicione seu laudo e clique no botão submeter", accept_multiple_files=False)
+        pdf_doc = st.file_uploader("Adicione seu laudo e clique no botão submeter", accept_multiple_files=True)
         if st.button("Submeter"):
             with st.spinner("Processando o laudo..."):
 
@@ -42,7 +73,6 @@ def main():
                 st.success("Laudo Classificado com sucesso!")
 
         try:
-            a = 45
             count_especialidade = qc.get_count("especialidade")
             count_modalidade = qc.get_count("modalidade")
             count_total = qc.get_count("id")
