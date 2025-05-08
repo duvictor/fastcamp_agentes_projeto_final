@@ -14,7 +14,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer
 from data.Protocolo import LaudoPDF
 import uuid
-
+from transformers import AutoTokenizer, AutoModel
 from src.Agentes import AgenteLaudoMedico
 from src.QdrantConection import upsert_to_qdrant
 
@@ -33,23 +33,51 @@ class Embedder:
     """
     def __init__(self):
         """
-        This class initializes an instance of a SentenceTransformer-based model
-        for generating embeddings efficiently. Specifically, it uses the
-        'all-MiniLM-L6-v2' pre-trained model from SentenceTransformers.
+        Represents a class that initializes a tokenizer and a sentence transformer model
+        for natural language processing tasks.
 
         Attributes
         ----------
+        tokenizer : AutoTokenizer
+            The tokenizer from the `sentence-transformers/all-MiniLM-L6-v2` model.
         model : SentenceTransformer
-            The sentence transformer instance initialized with the
-            'sentence-transformers/all-MiniLM-L6-v2' model to generate
-            sentence embeddings.
-        """
-        self.model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+            The sentence transformer model from `sentence-transformers/all-MiniLM-L6-v2`.
 
-    def generate_embeddings(self, setences):
+        Methods
+        -------
+        This class does not define any methods explicitly, but it initializes two
+        key components, tokenizer and model, used for text encoding and transformation.
+        """
+        self.tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
+        self.model = AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
+
+
+    # def custom_embeddings(self, text: str) -> list[float]:
+    #     # Tokenize and get model outputs
+    #     inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    #     outputs = self.model(**inputs)
+    #
+    #     # Use mean pooling to get text embedding
+    #     embeddings = outputs.last_hidden_state.mean(dim=1)
+    #
+    #     # Convert to list of floats and return
+    #     return embeddings[0].tolist()
+
+    def generate_embeddings(self, sentences: str) -> list[float]:
+        # Tokenize and get model outputs
+        inputs = self.tokenizer(sentences, return_tensors="pt", padding=True, truncation=True)
+        outputs = self.model(**inputs)
+
+        # Use mean pooling to get text embedding
+        embeddings = outputs.last_hidden_state.mean(dim=1)
+
+        # Convert to list of floats and return
+        return embeddings[0].tolist()
+
+    def generate_split_sentences(self, sentences):
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=220)
-        split_setences = text_splitter.split_text(setences)
-        return split_setences, self.model.encode(split_setences)
+        split_sentences = text_splitter.split_text(sentences)
+        return split_sentences
 
 
 
@@ -155,20 +183,28 @@ class TextUtil:
         docs = self.pdfUtil.extract_page_content(temp_file)
         for doc in docs:
             textos = doc.page_content
-            split_setences, embeddings = self.embeddingUtil.generate_embeddings(doc.page_content)
 
-            protocol_data = {"id": uuid.uuid4(),
-                             "name": file_name,
-                             "embedding": embeddings.tolist(),
-                             "textos": split_setences,
-                             "texto": textos,
-                             }
+            especialidade, modalidade, resumo = self.agentes.processar_laudo(textos)
 
-            laudoPDF = LaudoPDF(**protocol_data)
-            especialidade, modalidade, resumo = self.agentes.processar_laudo(laudoPDF)
-            laudoPDF.especialidade = especialidade
-            laudoPDF.modalidade = modalidade
-            laudoPDF.sumarizacao = resumo
-            upsert_to_qdrant(laudoPDF)
+            split_sentences = self.embeddingUtil.generate_split_sentences(doc.page_content)
+
+            for split_local in split_sentences:
+
+                embeddings = self.embeddingUtil.generate_embeddings(split_local)
+
+                protocol_data = {"id": uuid.uuid4(),
+                                 "name": file_name,
+                                 "embedding": embeddings,
+                                 "texto": split_local,
+                                 "page_content": textos,
+                                 }
+
+                laudoPDF = LaudoPDF(**protocol_data)
+
+                laudoPDF.especialidade = especialidade
+                laudoPDF.modalidade = modalidade
+                laudoPDF.sumarizacao = resumo
+                upsert_to_qdrant(laudoPDF)
+            # closeQdrant()
 
 

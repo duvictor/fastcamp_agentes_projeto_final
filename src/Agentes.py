@@ -5,7 +5,8 @@ Universidade Federal de Goiás
 """
 
 from crewai import Crew, Process, Agent, Task, LLM
-from crewai_tools import QdrantVectorSearchTool
+from src.qdrant_search_tool_custom import QdrantVectorSearchToolCustom
+from qdrant_client import QdrantClient
 from sentence_transformers import SentenceTransformer
 from data.Protocolo import LaudoPDF
 import uuid
@@ -15,10 +16,80 @@ from src.QdrantConection import upsert_to_qdrant
 from langchain_openai import ChatOpenAI
 import os
 from dotenv import load_dotenv
-
+from transformers import AutoTokenizer, AutoModel
+from src.QdrantConection import get_cliente
 
 load_dotenv()
 os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
+COLLECTION_NAME = os.environ["COLLECTION_NAME"]
+PATH_QDRANT = os.environ["PATH_QDRANT"]
+
+
+class AgenteRetriever:
+    def __init__(self):
+        self.llm_OpenAI = ChatOpenAI()
+        self.tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
+        self.model = AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
+
+        self.qdrant_tool = QdrantVectorSearchToolCustom(
+            client=get_cliente(),
+            collection_name=COLLECTION_NAME,
+            limit=3,
+            score_threshold=0.35,
+            query_filter=None,
+            custom_embedding_fn=self.custom_embeddings  # Pass your custom function
+        )
+
+
+        # Create an agent that uses the tool
+        self.agentPdfRetriever = Agent(
+            role="Médico pesquisador",
+            goal="Encontrar informações relevantes em laudos médicos",
+            backstory="""Você está trabalhando em um sistema médico que busca laudos a partir da especialidade, da modalidade e do resumo (sumarização).""",
+            tools=[self.qdrant_tool]
+        )
+        # Define tasks
+        self.search_task = Task(
+            description="""Encontre laudos relevantes similares ao texto a seguir: {query}.""",
+            expected_output="""Sua saída final deverá ser em português e deverá incluir:
+            - A informação relevante encontrada
+            - O score da similaridade dos resultados
+            - O metadado do laudo encontrado""",
+            agent=self.agentPdfRetriever
+        )
+
+
+    def retriever_query(self, query) -> str:
+        # Run CrewAI workflow
+        crew = Crew(
+            agents=[self.agentPdfRetriever],
+            tasks=[self.search_task],
+            process=Process.sequential,
+            memory=True,
+            verbose=True
+        )
+
+        result = crew.kickoff(
+            inputs={"query": query}
+        )
+        print(result)
+
+        return result.raw
+
+
+    def custom_embeddings(self, text: str) -> list[float]:
+        # Tokenize and get model outputs
+        inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+        outputs = self.model(**inputs)
+
+        # Use mean pooling to get text embedding
+        embeddings = outputs.last_hidden_state.mean(dim=1)
+
+        # Convert to list of floats and return
+        return embeddings[0].tolist()
+
+
+
 
 
 class AgenteLaudoMedico:
@@ -54,19 +125,7 @@ class AgenteLaudoMedico:
             Portuguese. The task emphasizes the ease of understanding for non-medical users.
         """
         self.llm_OpenAI = ChatOpenAI()
-        # Initialize the tool
-        # self.qdrant_tool = QdrantVectorSearchTool(
-        #     qdrant_url="your_qdrant_url",
-        #     qdrant_api_key="your_qdrant_api_key",
-        #     collection_name="your_collection"
-        # )
-        # # Create an agent that uses the tool
-        # self.agentPdfRetriever = Agent(
-        #     role="Research Assistant",
-        #     goal="Find relevant information in documents",
-        #     backstory="""Você está trabalhando em um sistema médico que busca laudos a partir da especialidade e da modalidade.""",
-        #     tools=[self.qdrant_tool]
-        # )
+
         # Create an agent that uses the tool
         self.agentEspecialidade = Agent(
             role="Médico especialista",
@@ -95,7 +154,8 @@ class AgenteLaudoMedico:
                             " <modalidades> "
                             " {lista_modalidades} "
                             " </modalidades> "
-                            " O retorno deve ser apenas a modalidade, como por exemplo: Mamografia",
+                            " O retorno deve ser apenas a modalidade, como por exemplo: Mamografia."
+                            " Caso não haja nenhuma modalidade para o laudo, retorne: Outros. ",
             agent=self.agentModalidade
             )
 
@@ -115,18 +175,25 @@ class AgenteLaudoMedico:
 
 
 
-    def processar_laudo(self, laudoPdf: LaudoPDF):
+    def processar_laudo(self, textos: str):
         """
-        Processes a given medical report (laudo) using CrewAI workflows by leveraging agents and tasks
-        configured for extracting specific medical specialties, modalities, and summarizing the report
-        content. The method sequentially executes the workflows and returns raw results of all executed
-        tasks.
+        Processes a medical report using multiple workflows to determine medical specialty,
+        modality, and to summarize the report text.
 
-        :param laudoPdf: The medical report in PDF format that needs to be processed. It contains the text
-            which will be analyzed through different task chains managed by CrewAI workflows.
-        :type laudoPdf: LaudoPDF
-        :return: A tuple consisting of raw results from the workflows, which includes extracted medical
-            specialties, identified modalities, and a summarized version of the report.
+        The function executes three sequential CrewAI workflows: one for identifying the
+        medical specialty, another for determining the modality of the medical procedure,
+        and a final one for summarizing the content of the medical report. It utilizes
+        specified agents and tasks defined within the CrewAI platform to achieve these goals.
+
+        The outputs from all three workflows are collected and returned as raw results.
+
+        :param textos: The content of the medical report in text format to be processed.
+        :type textos: str
+        :return:
+            A tuple containing the raw results of the following workflows:
+            - Medical specialty identification.
+            - Medical modality classification.
+            - Medical report summarization.
         :rtype: tuple
         """
         # Run CrewAI workflow
@@ -134,6 +201,7 @@ class AgenteLaudoMedico:
             agents=[self.agentEspecialidade],
             tasks=[self.tarefaEspecialidade],
             process=Process.sequential,
+            memory=True,
             verbose=True
         )
 
@@ -141,6 +209,7 @@ class AgenteLaudoMedico:
             agents=[self.agentModalidade],
             tasks=[self.tarefaModalidade],
             process=Process.sequential,
+            memory=True,
             verbose=True
         )
 
@@ -148,6 +217,7 @@ class AgenteLaudoMedico:
             agents=[self.agentSummarizer],
             tasks=[self.tarefaSummarizer],
             process=Process.sequential,
+            memory=True,
             verbose=True
         )
 
@@ -157,20 +227,20 @@ class AgenteLaudoMedico:
 
 
         result_especialidade = crew_especialidade.kickoff(
-            inputs={"laudo": laudoPdf.texto, "lista_especialidades": lista_especialidades}
+            inputs={"laudo": textos, "lista_especialidades": lista_especialidades}
         )
         print(result_especialidade)
 
 
         result_modalidade = crew_modalidade.kickoff(
-            inputs={"laudo": laudoPdf.texto,
+            inputs={"laudo": textos,
                     "lista_modalidades": lista_modalidades}
         )
         print(result_modalidade)
 
 
         result_summarizer = crew_summarizer.kickoff(
-            inputs={"laudo": laudoPdf.texto}
+            inputs={"laudo": textos}
         )
         print(result_summarizer)
 

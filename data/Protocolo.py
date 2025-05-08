@@ -44,10 +44,16 @@ class LaudoPDF(BaseModel):
     texto: str
     especialidade: Optional[str] = None
     modalidade: Optional[str] = None
-    textos: List[str]
+    page_content: str
     sumarizacao: Optional[str] = None
     embedding: List
 
+    # protocol_data = {"id": uuid.uuid4(),
+    #                  "name": file_name,
+    #                  "embedding": embeddings,
+    #                  "texto": split_local,
+    #                  "page_content": textos,
+    #                  }
     # palavra_chaves: List[str]
     # modalidade:str
     # especialidade:str

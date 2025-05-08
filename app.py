@@ -5,6 +5,7 @@ Universidade Federal de Goiás
 """
 import streamlit as st
 import src.Util as utils
+import src.Agentes as agents
 import src.QdrantConection as qc
 
 
@@ -46,12 +47,14 @@ def main():
     st.header("RAG De Laudos Médicos")
 
     textUtil = utils.TextUtil()
+    retriever = agents.AgenteRetriever()
 
     user_question = st.text_input("Faça uma pergunta sobre os laudos médicos")
 
     if user_question:
-        a = 45
-        # user_input(user_question)
+        resultado = retriever.retriever_query(user_question)
+        st.write(resultado)
+
 
     with st.sidebar:
         st.title("Menu:")
@@ -87,7 +90,7 @@ def main():
 
         # st.markdown("# Seção Principal 1")
         # st.markdown("## Seção Principal 2")
-        st.markdown(f"### Quantidade de Laudos: {count_total}")
+        st.markdown(f"### Quantidade de textos: {count_total}")
         # opcao1 = st.checkbox("Opção 1")
         # opcao2 = st.selectbox("Escolha uma opção", ["A", "B", "C"])
         #

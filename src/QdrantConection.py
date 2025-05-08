@@ -7,6 +7,7 @@ from qdrant_client import QdrantClient, models
 import os
 from dotenv import load_dotenv
 # from qdrant_client.http import models as rest
+from qdrant_client.models import PointStruct, Distance, VectorParams
 
 
 # from src.modelo.Protocolo import ProtocoloImagem
@@ -15,10 +16,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 COLLECTION_NAME = os.environ["COLLECTION_NAME"]
+PATH_QDRANT = os.environ["PATH_QDRANT"]
 
 
 try:
-    client = QdrantClient(path="/tmp/langchain_qdrant")
+    client = QdrantClient(path=PATH_QDRANT)
     collections = client.get_collections()
 except Exception:
     # Docker is unavailable in Google Colab so we switch to local
@@ -40,30 +42,32 @@ print(collections)
 # except Exception as e:
 #     print(e)
 
-
+# try:
+#     client.delete_collection(collection_name=COLLECTION_NAME)
+# except Exception as e:
+#     print(f"Error during delete collection: {e}")
 
 try:
     client.create_collection(
         collection_name=COLLECTION_NAME,
         on_disk_payload=True,  # store the payload on disk
-        vectors_config=models.VectorParams(
-            size=128,
-            distance=models.Distance.COSINE,
-            on_disk=True, # move original vectors to disk
-            multivector_config=models.MultiVectorConfig(
-                comparator=models.MultiVectorComparator.MAX_SIM
-            ),
-            quantization_config=models.BinaryQuantization(
-            binary=models.BinaryQuantizationConfig(
-                always_ram=True  # keep only quantized vectors in RAM
-                ),
-            ),
-        ),
+        vectors_config=VectorParams(size=384, distance=Distance.COSINE)
     )
 except Exception as e:
     print(f"Error during create collection: {e}")
 
 
+def get_cliente() -> QdrantClient:
+    """
+    Provides a function to initialize and return an instance of QdrantClient.
+
+    This function is responsible for creating and returning a unique QdrantClient object,
+    which is commonly used to interact with a Qdrant database.
+
+    :return: An instance of QdrantClient initialized and ready to use.
+    :rtype: QdrantClient
+    """
+    return client
 
 def get_count(chave):
     """
@@ -135,10 +139,15 @@ def upsert_to_qdrant(laudoPdf) -> bool:
             points=points,
             wait=False,
         )
+
     except Exception as e:
         print(f"Error during upsert: {e}")
         return False
     return True
+
+
+# def closeQdrant(self):
+#     client.close()
 
 
 # def upsert_to_qdrant(multivector, protocolo) -> bool:
