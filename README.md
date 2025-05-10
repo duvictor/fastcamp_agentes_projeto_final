@@ -42,7 +42,7 @@ Além de possibilitar que os agentes possam esclarecer de forma resumida e em li
 └── README.md                # Documentação do projeto
 ```
 
-O dataset foi desenvolvido por uma equipe do Hospital Albert Einstein para testes internos e não poderá ser utilizado
+O dataset foi desenvolvido por uma equipe de cientista de dados de um hospital privado apenas para testes internos e não poderá ser utilizado
 em outros projetos sem o devido consentimento. 
 
 Todos os direitos são reservados.
